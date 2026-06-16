@@ -1,0 +1,1195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tracker de Demandas — Shopee BR</title>
+<style>
+  :root {
+    --orange: #EE4D2D;
+    --orange-light: #FFF0ED;
+    --orange-mid: #FDDDD7;
+    --ink: #1A1A1A;
+    --ink-2: #444;
+    --ink-3: #888;
+    --ink-4: #BBB;
+    --surface: #FAFAFA;
+    --white: #FFFFFF;
+    --border: #EBEBEB;
+    --border-strong: #D0D0D0;
+    --blue: #1677FF;
+    --blue-light: #E6F4FF;
+    --green: #389E0D;
+    --green-light: #F6FFED;
+    --amber: #D46B08;
+    --amber-light: #FFF7E6;
+    --red: #CF1322;
+    --red-light: #FFF1F0;
+    --purple: #531DAB;
+    --purple-light: #F9F0FF;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--surface);
+    color: var(--ink);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; flex-direction: column; min-height: 100vh; }
+
+  header {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-mark {
+    width: 28px; height: 28px;
+    background: var(--orange);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  .logo-mark svg { width: 16px; height: 16px; }
+
+  .logo-text {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .config-btn {
+    font-size: 12px;
+    color: var(--ink-3);
+    background: none;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    padding: 5px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+  }
+  .config-btn:hover { background: var(--surface); color: var(--ink-2); }
+
+  /* ── NAV ── */
+  nav {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    gap: 0;
+  }
+
+  .nav-item {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--ink-3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all .15s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .nav-item:hover { color: var(--ink-2); }
+  .nav-item.active { color: var(--orange); border-bottom-color: var(--orange); font-weight: 500; }
+
+  /* ── MAIN ── */
+  main { flex: 1; padding: 2rem; max-width: 900px; margin: 0 auto; width: 100%; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .card + .card { margin-top: 12px; }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* ── FORM ── */
+  .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+  .field { display: flex; flex-direction: column; gap: 5px; }
+
+  label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  input, select, textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    font-size: 13px;
+    color: var(--ink);
+    background: var(--white);
+    transition: border-color .15s, box-shadow .15s;
+    font-family: inherit;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(238,77,45,.1);
+  }
+
+  textarea { resize: vertical; min-height: 80px; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    transition: all .15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-primary {
+    background: var(--orange);
+    color: #fff;
+  }
+  .btn-primary:hover { background: #D63E20; }
+  .btn-primary:disabled { background: var(--border-strong); color: var(--ink-4); cursor: default; }
+
+  .btn-ghost {
+    background: none;
+    color: var(--ink-2);
+    border: 1px solid var(--border-strong);
+  }
+  .btn-ghost:hover { background: var(--surface); }
+
+  .btn-ai {
+    background: var(--purple-light);
+    color: var(--purple);
+    border: 1px solid #D3ADF7;
+  }
+  .btn-ai:hover { background: #EFE6FF; }
+
+  /* ── AI BOX ── */
+  .ai-panel {
+    background: var(--purple-light);
+    border: 1px solid #D3ADF7;
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-top: 14px;
+  }
+
+  .ai-panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--purple);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .ai-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .chip {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .chip-red { background: var(--red-light); color: var(--red); }
+  .chip-amber { background: var(--amber-light); color: var(--amber); }
+  .chip-green { background: var(--green-light); color: var(--green); }
+  .chip-blue { background: var(--blue-light); color: var(--blue); }
+  .chip-purple { background: var(--purple-light); color: var(--purple); }
+  .chip-gray { background: var(--surface); color: var(--ink-2); border: 1px solid var(--border); }
+
+  .ai-insight {
+    font-size: 12px;
+    color: var(--purple);
+    line-height: 1.5;
+  }
+
+  /* ── BADGES ── */
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    display: inline-block;
+  }
+  .badge-recebida { background: var(--blue-light); color: var(--blue); }
+  .badge-enviada { background: var(--green-light); color: var(--green); }
+  .badge-projeto { background: var(--purple-light); color: var(--purple); }
+  .badge-urgencia { background: var(--red-light); color: var(--red); }
+
+  /* ── DEMAND CARD ── */
+  .demand-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 8px;
+    transition: box-shadow .15s;
+  }
+  .demand-card:hover { box-shadow: var(--shadow-md); }
+
+  .demand-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+  .demand-title { font-size: 13px; font-weight: 500; color: var(--ink); line-height: 1.4; }
+  .demand-meta { font-size: 11px; color: var(--ink-3); margin-top: 3px; }
+  .demand-chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+
+  .centralizavel-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .c-alto { background: var(--red-light); color: var(--red); }
+  .c-medio { background: var(--amber-light); color: var(--amber); }
+  .c-baixo { background: var(--green-light); color: var(--green); }
+
+  /* ── METRICS ── */
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+
+  .metric-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .metric-label { font-size: 11px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  .metric-value { font-size: 26px; font-weight: 700; color: var(--ink); margin-top: 4px; letter-spacing: -0.02em; }
+  .metric-sub { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+
+  /* ── ALERT ── */
+  .alert {
+    background: var(--amber-light);
+    border: 1px solid #FFD591;
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    font-size: 12px;
+    color: var(--amber);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  /* ── PROGRESS ── */
+  .person-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .person-bar:last-child { border-bottom: none; }
+
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--orange-mid);
+    color: var(--orange);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .bar-track {
+    flex: 1;
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bar-fill { height: 100%; background: var(--orange); border-radius: 3px; transition: width .4s ease; }
+
+  /* ── CONFIG MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.45);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--white);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-md);
+  }
+
+  .modal-title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .modal-sub { font-size: 12px; color: var(--ink-3); margin-bottom: 1.25rem; line-height: 1.5; }
+
+  .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.25rem; }
+
+  .step-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 6px 10px;
+    font-size: 12px;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+    width: 100%;
+  }
+
+  .step-num {
+    width: 18px; height: 18px;
+    background: var(--orange);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .link-step { color: var(--blue); text-decoration: none; }
+  .link-step:hover { text-decoration: underline; }
+
+  .conn-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+  .conn-ok { background: var(--green-light); color: var(--green); }
+  .conn-err { background: var(--red-light); color: var(--red); }
+  .conn-pending { background: var(--surface); color: var(--ink-3); border: 1px solid var(--border); }
+
+  /* ── SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 13px; height: 13px;
+    border: 2px solid var(--border-strong);
+    border-top-color: var(--purple);
+    border-radius: 50%;
+    animation: spin .6s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── EMPTY ── */
+  .empty {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+  .empty-icon { font-size: 32px; margin-bottom: 8px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    display: none;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-md);
+    z-index: 2000;
+    animation: slideUp .2s ease;
+  }
+  .toast.show { display: flex; }
+  @keyframes slideUp { from { transform: translateY(8px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  /* ── NOTION STATUS BAR ── */
+  .notion-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 2rem;
+    font-size: 11px;
+    color: var(--ink-3);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filters { display: flex; gap: 8px; margin-bottom: 1rem; }
+  .filters select { width: auto; font-size: 12px; }
+
+  .section-title { font-size: 13px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+
+  .split-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px; }
+  .split-col-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 8px; }
+  .split-item { font-size: 11px; color: var(--ink-2); padding: 5px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
+  .split-item:last-child { border-bottom: none; }
+
+  @media (max-width: 600px) {
+    .form-grid-2, .form-grid-3, .split-grid { grid-template-columns: 1fr; }
+    main { padding: 1rem; }
+    header, nav { padding: 0 1rem; }
+    .metrics-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 16 16" fill="none">
+          <path d="M8 2L14 5.5V10.5L8 14L2 10.5V5.5L8 2Z" fill="white" opacity=".9"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-text">Tracker de Demandas</div>
+        <div class="logo-sub">Shopee BR · Comercial & Operações</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span id="conn-status-header" class="conn-status conn-pending">⬤ Sem Notion</span>
+      <button class="config-btn" onclick="openModal()">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 10a2 2 0 100-4 2 2 0 000 4z" stroke="currentColor" stroke-width="1.5"/><path d="M13.2 8c0-.28.02-.56.06-.82l1.38-.8a.5.5 0 00.18-.68l-1.3-2.25a.5.5 0 00-.66-.19l-1.37.79a5.1 5.1 0 00-1.42-.82L9.8 1.62A.5.5 0 009.3 1H6.7a.5.5 0 00-.49.62l-.37 1.61a5.1 5.1 0 00-1.42.82l-1.37-.79a.5.5 0 00-.66.19L1.09 5.7a.5.5 0 00.18.68l1.38.8c-.04.26-.05.54-.05.82s.01.56.05.82l-1.38.8a.5.5 0 00-.18.68l1.3 2.25c.14.23.43.32.66.19l1.37-.79c.44.32.92.58 1.42.82l.37 1.61c.08.36.41.62.49.62h2.6a.5.5 0 00.49-.62l-.37-1.61a5.1 5.1 0 001.42-.82l1.37.79c.23.13.52.04.66-.19l1.3-2.25a.5.5 0 00-.18-.68l-1.38-.8c.04-.26.05-.54.05-.82z" stroke="currentColor" stroke-width="1.5"/></svg>
+        Configurar Notion
+      </button>
+    </div>
+  </header>
+
+  <!-- NOTION STATUS BAR -->
+  <div class="notion-bar" id="notion-bar">
+    <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Configure o Notion para sincronizar demandas com o time. Até lá, os dados ficam salvos localmente neste navegador.
+  </div>
+
+  <!-- NAV -->
+  <nav>
+    <button class="nav-item active" onclick="switchTab('registrar', this)">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      Registrar
+    </button>
+    <button class="nav-item" onclick="switchTab('demandas', this)">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="2" rx="1" fill="currentColor"/><rect x="2" y="7" width="9" height="2" rx="1" fill="currentColor"/><rect x="2" y="11" width="6" height="2" rx="1" fill="currentColor"/></svg>
+      Demandas
+    </button>
+    <button class="nav-item" onclick="switchTab('dashboard', this)">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="8" width="3" height="6" rx="1" fill="currentColor"/><rect x="6.5" y="5" width="3" height="9" rx="1" fill="currentColor"/><rect x="11" y="2" width="3" height="12" rx="1" fill="currentColor"/></svg>
+      Dashboard
+    </button>
+  </nav>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- TAB: REGISTRAR -->
+    <div class="tab-panel active" id="tab-registrar">
+      <div class="card" style="margin-bottom:12px">
+        <div class="card-title">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Nova demanda
+        </div>
+
+        <div class="form-grid-2" style="margin-bottom:12px">
+          <div class="field">
+            <label>Seu nome</label>
+            <select id="f-pessoa">
+              <option value="">Selecione...</option>
+              <option>Ste (Gerente)</option>
+              <option>Gerente Jr – Planning</option>
+              <option>Senior 1 – Planning</option>
+              <option>Senior 2 – Planning</option>
+              <option>Pleno 1 – Planning</option>
+              <option>Pleno 2 – Planning</option>
+              <option>Coordenadora – Campanhas</option>
+              <option>Senior – Campanhas</option>
+              <option>Pleno 1 – Campanhas</option>
+              <option>Pleno 2 – Campanhas</option>
+              <option>Estagiária – Campanhas</option>
+              <option>Senior – Fulfillment</option>
+              <option>Senior – Operações</option>
+              <option>Pleno – Operações</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="f-tipo">
+              <option value="">Selecione...</option>
+              <option value="Recebida">Recebida de outra área</option>
+              <option value="Enviada">Enviada ao comercial</option>
+              <option value="Projeto interno">Projeto interno</option>
+              <option value="Urgência adhoc">Urgência adhoc</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field" style="margin-bottom:12px">
+          <label>Descrição da demanda <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink-4)">(escreva naturalmente — a IA classifica)</span></label>
+          <textarea id="f-descricao" placeholder="Ex: Recebi pedido urgente do time de AMS para mapear sellers elegíveis para Entrega Turbo até amanhã às 12h..."></textarea>
+        </div>
+
+        <div class="form-grid-3" style="margin-bottom:14px">
+          <div class="field">
+            <label>Origem / quem pediu</label>
+            <input type="text" id="f-origem" placeholder="Ex: Igor Mateus, Time AMS...">
+          </div>
+          <div class="field">
+            <label>DDL</label>
+            <input type="date" id="f-ddl">
+          </div>
+          <div class="field">
+            <label>Tempo estimado</label>
+            <select id="f-tempo">
+              <option value="">—</option>
+              <option value="0.5">Menos de 1h</option>
+              <option value="2">1 a 3h</option>
+              <option value="4">Meio dia</option>
+              <option value="8">1 dia inteiro</option>
+              <option value="20">2 a 3 dias</option>
+              <option value="32">Mais de 3 dias</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="ai-panel" style="display:none"></div>
+
+        <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+          <button class="btn btn-ai" onclick="analisarIA()" id="btn-ai">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 4.5H14L10.5 8l1.5 4.5L8 10 4 12.5 5.5 8 2 5.5h4.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            Analisar com IA
+          </button>
+          <button class="btn btn-primary" onclick="salvarDemanda()" id="btn-salvar">Salvar demanda</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: DEMANDAS -->
+    <div class="tab-panel" id="tab-demandas">
+      <div class="filters">
+        <select id="filtro-tipo" onchange="renderDemandas()">
+          <option value="">Todos os tipos</option>
+          <option value="Recebida">Recebida</option>
+          <option value="Enviada">Enviada</option>
+          <option value="Projeto interno">Projeto interno</option>
+          <option value="Urgência adhoc">Urgência adhoc</option>
+        </select>
+        <select id="filtro-pessoa" onchange="renderDemandas()">
+          <option value="">Todas as pessoas</option>
+          <option>Ste (Gerente)</option>
+          <option>Gerente Jr – Planning</option>
+          <option>Senior 1 – Planning</option>
+          <option>Senior 2 – Planning</option>
+          <option>Pleno 1 – Planning</option>
+          <option>Pleno 2 – Planning</option>
+          <option>Coordenadora – Campanhas</option>
+          <option>Senior – Campanhas</option>
+          <option>Pleno 1 – Campanhas</option>
+          <option>Pleno 2 – Campanhas</option>
+          <option>Estagiária – Campanhas</option>
+          <option>Senior – Fulfillment</option>
+          <option>Senior – Operações</option>
+          <option>Pleno – Operações</option>
+        </select>
+        <select id="filtro-centralizavel" onchange="renderDemandas()">
+          <option value="">Todos os riscos</option>
+          <option value="Alto risco">Alto risco centralização</option>
+          <option value="Risco médio">Risco médio</option>
+          <option value="Baixo risco">Baixo risco</option>
+        </select>
+      </div>
+      <div id="lista-demandas"></div>
+    </div>
+
+    <!-- TAB: DASHBOARD -->
+    <div class="tab-panel" id="tab-dashboard">
+      <div id="dash-content"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CONFIG MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" fill="#EE4D2D"/></svg>
+      Conectar ao Notion
+    </div>
+    <p class="modal-sub">Siga os 3 passos abaixo. Leva ~3 minutos. Depois de configurar, todas as demandas do time sincronizam automaticamente.</p>
+
+    <div class="step-pill">
+      <span class="step-num">1</span>
+      <span>Acesse <a class="link-step" href="https://www.notion.so/my-integrations" target="_blank">notion.so/my-integrations</a> → "New integration" → copie o <b>Internal Integration Token</b></span>
+    </div>
+    <div class="step-pill">
+      <span class="step-num">2</span>
+      <span>Crie uma página no Notion, abra com "..." → "Add connections" → conecte sua integração → copie o <b>Page ID</b> da URL (32 caracteres após o último /)</span>
+    </div>
+    <div class="step-pill">
+      <span class="step-num">3</span>
+      <span>Cole os dados abaixo e salve. O database de demandas será criado automaticamente.</span>
+    </div>
+
+    <div class="field" style="margin-top:14px;margin-bottom:10px">
+      <label>Notion Integration Token</label>
+      <input type="password" id="cfg-token" placeholder="secret_xxxxxxxxxxxxxxxx">
+    </div>
+    <div class="field" style="margin-bottom:4px">
+      <label>Page ID (onde criar o database)</label>
+      <input type="text" id="cfg-page" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+    </div>
+
+    <div id="modal-status" style="margin-top:10px;font-size:12px;min-height:20px"></div>
+
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancelar</button>
+      <button class="btn btn-ai" onclick="testarConexao()" id="btn-test">Testar conexão</button>
+      <button class="btn btn-primary" onclick="salvarConfig()" id="btn-save-cfg">Salvar e conectar</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+const PESSOAS_NIVEL = {
+  'Ste (Gerente)': 'Gerente',
+  'Gerente Jr – Planning': 'Gerente Jr',
+  'Senior 1 – Planning': 'Senior', 'Senior 2 – Planning': 'Senior',
+  'Pleno 1 – Planning': 'Pleno', 'Pleno 2 – Planning': 'Pleno',
+  'Coordenadora – Campanhas': 'Coordenadora',
+  'Senior – Campanhas': 'Senior',
+  'Pleno 1 – Campanhas': 'Pleno', 'Pleno 2 – Campanhas': 'Pleno',
+  'Estagiária – Campanhas': 'Estagiária',
+  'Senior – Fulfillment': 'Senior',
+  'Senior – Operações': 'Senior', 'Pleno – Operações': 'Pleno'
+};
+
+let demandas = JSON.parse(localStorage.getItem('demandas_v2') || '[]');
+let notionToken = localStorage.getItem('notion_token') || '';
+let notionDB = localStorage.getItem('notion_db') || '';
+let aiCache = null;
+
+function save() { localStorage.setItem('demandas_v2', JSON.stringify(demandas)); }
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.innerHTML = (ok ? '✓ ' : '✗ ') + msg;
+  t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2800);
+}
+
+function switchTab(name, el) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  el.classList.add('active');
+  if (name === 'demandas') renderDemandas();
+  if (name === 'dashboard') renderDashboard();
+}
+
+function updateStatusBar() {
+  const bar = document.getElementById('notion-bar');
+  const hdr = document.getElementById('conn-status-header');
+  if (notionToken && notionDB) {
+    bar.innerHTML = '✓ Notion conectado — demandas sincronizam em tempo real com o workspace do time.';
+    bar.style.color = 'var(--green)';
+    bar.style.background = 'var(--green-light)';
+    hdr.className = 'conn-status conn-ok';
+    hdr.textContent = '⬤ Notion conectado';
+  } else {
+    bar.innerHTML = '<svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Configure o Notion para sincronizar demandas com o time. Até lá, os dados ficam salvos localmente neste navegador.';
+    bar.style.color = '';
+    bar.style.background = '';
+    hdr.className = 'conn-status conn-pending';
+    hdr.textContent = '⬤ Sem Notion';
+  }
+}
+updateStatusBar();
+
+// ── AI ANALYSIS ──
+async function analisarIA() {
+  const desc = document.getElementById('f-descricao').value.trim();
+  const tipo = document.getElementById('f-tipo').value;
+  if (!desc) { toast('Preencha a descrição antes de analisar.', false); return; }
+
+  const panel = document.getElementById('ai-panel');
+  panel.style.display = 'block';
+  panel.innerHTML = `<div class="ai-panel"><div class="ai-panel-title"><span class="spinner"></span> Analisando com IA...</div></div>`;
+  document.getElementById('btn-ai').disabled = true;
+
+  const prompt = `Você é especialista em gestão de times em e-commerce (Shopee Brasil).
+Analise esta demanda e retorne SOMENTE um JSON válido, sem markdown, sem explicação.
+
+Demanda: "${desc}"
+Tipo informado: "${tipo || 'não informado'}"
+
+JSON esperado:
+{
+  "urgencia": "Alta" | "Média" | "Baixa",
+  "senioridade_minima": "Estagiário" | "Pleno" | "Senior" | "Gerente",
+  "centralizavel": "Alto risco" | "Risco médio" | "Baixo risco",
+  "motivo_centralizavel": "string até 12 palavras",
+  "categoria": "string até 4 palavras",
+  "observacao": "string até 15 palavras com insight para gestão de headcount"
+}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content.find(b => b.type === 'text')?.text || '{}';
+    const ai = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    aiCache = ai;
+
+    const urgChip = ai.urgencia === 'Alta' ? 'chip-red' : ai.urgencia === 'Média' ? 'chip-amber' : 'chip-green';
+    const cenChip = ai.centralizavel === 'Alto risco' ? 'chip-red' : ai.centralizavel === 'Risco médio' ? 'chip-amber' : 'chip-green';
+
+    panel.innerHTML = `<div class="ai-panel">
+      <div class="ai-panel-title">
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 4.5H14L10.5 8l1.5 4.5L8 10 4 12.5 5.5 8 2 5.5h4.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        Análise IA
+      </div>
+      <div class="ai-chips">
+        <span class="chip ${urgChip}">Urgência: ${ai.urgencia}</span>
+        <span class="chip chip-purple">Mínimo: ${ai.senioridade_minima}</span>
+        <span class="chip chip-gray">${ai.categoria}</span>
+        <span class="chip ${cenChip}">Central.: ${ai.centralizavel}</span>
+      </div>
+      <div class="ai-insight"><b>Por que ${ai.centralizavel.toLowerCase()}:</b> ${ai.motivo_centralizavel}</div>
+      <div class="ai-insight" style="margin-top:4px"><b>Insight:</b> ${ai.observacao}</div>
+    </div>`;
+  } catch (e) {
+    panel.innerHTML = `<div class="ai-panel"><div class="ai-insight" style="color:var(--red)">Erro na análise. Verifique a conexão e tente novamente.</div></div>`;
+  }
+  document.getElementById('btn-ai').disabled = false;
+}
+
+// ── SAVE DEMAND ──
+async function salvarDemanda() {
+  const pessoa = document.getElementById('f-pessoa').value;
+  const tipo = document.getElementById('f-tipo').value;
+  const desc = document.getElementById('f-descricao').value.trim();
+  if (!pessoa || !tipo || !desc) { toast('Preencha nome, tipo e descrição.', false); return; }
+
+  const d = {
+    id: Date.now(),
+    pessoa, tipo, desc,
+    origem: document.getElementById('f-origem').value,
+    ddl: document.getElementById('f-ddl').value,
+    tempo: parseFloat(document.getElementById('f-tempo').value) || 0,
+    data: new Date().toISOString().slice(0, 10),
+    ai: aiCache ? { ...aiCache } : null
+  };
+
+  demandas.unshift(d);
+  save();
+  aiCache = null;
+
+  ['f-descricao', 'f-origem'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-ddl').value = '';
+  document.getElementById('f-tipo').value = '';
+  document.getElementById('f-tempo').value = '';
+  document.getElementById('ai-panel').style.display = 'none';
+
+  if (notionToken && notionDB) {
+    toast('Salvando no Notion...');
+    await enviarNotion(d);
+  } else {
+    toast('Demanda salva localmente!');
+  }
+}
+
+// ── NOTION INTEGRATION ──
+async function enviarNotion(d) {
+  try {
+    const props = {
+      "Demanda": { title: [{ text: { content: d.desc.slice(0, 200) } }] },
+      "Pessoa": { select: { name: d.pessoa } },
+      "Tipo": { select: { name: d.tipo } },
+      "Origem": { rich_text: [{ text: { content: d.origem || '' } }] },
+      "Data": { date: { start: d.data } },
+      "Categoria": { rich_text: [{ text: { content: d.ai?.categoria || '' } }] },
+      "Urgência": { select: { name: d.ai?.urgencia || 'Não analisada' } },
+      "Senioridade Mínima": { select: { name: d.ai?.senioridade_minima || 'Não analisada' } },
+      "Centralizável": { select: { name: d.ai?.centralizavel || 'Não analisada' } },
+      "Tempo (h)": { number: d.tempo || 0 }
+    };
+    if (d.ddl) props["DDL"] = { date: { start: d.ddl } };
+
+    const resp = await fetch('https://api.notion.com/v1/pages', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${notionToken}`,
+        'Content-Type': 'application/json',
+        'Notion-Version': '2022-06-28'
+      },
+      body: JSON.stringify({ parent: { database_id: notionDB }, properties: props })
+    });
+    const data = await resp.json();
+    if (data.object === 'page') toast('Salvo no Notion!');
+    else toast('Erro ao salvar no Notion: ' + (data.message || 'verifique as configurações'), false);
+  } catch (e) {
+    toast('Falha na conexão com Notion.', false);
+  }
+}
+
+async function criarDatabaseNotion(token, pageId) {
+  const resp = await fetch('https://api.notion.com/v1/databases', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+      'Notion-Version': '2022-06-28'
+    },
+    body: JSON.stringify({
+      parent: { type: 'page_id', page_id: pageId },
+      title: [{ type: 'text', text: { content: 'Tracker de Demandas' } }],
+      properties: {
+        "Demanda": { title: {} },
+        "Pessoa": { select: { options: [] } },
+        "Tipo": { select: { options: [
+          { name: 'Recebida', color: 'blue' },
+          { name: 'Enviada', color: 'green' },
+          { name: 'Projeto interno', color: 'purple' },
+          { name: 'Urgência adhoc', color: 'red' }
+        ]}},
+        "Urgência": { select: { options: [
+          { name: 'Alta', color: 'red' },
+          { name: 'Média', color: 'yellow' },
+          { name: 'Baixa', color: 'green' },
+          { name: 'Não analisada', color: 'gray' }
+        ]}},
+        "Centralizável": { select: { options: [
+          { name: 'Alto risco', color: 'red' },
+          { name: 'Risco médio', color: 'yellow' },
+          { name: 'Baixo risco', color: 'green' },
+          { name: 'Não analisada', color: 'gray' }
+        ]}},
+        "Senioridade Mínima": { select: { options: [
+          { name: 'Gerente', color: 'red' },
+          { name: 'Senior', color: 'orange' },
+          { name: 'Pleno', color: 'yellow' },
+          { name: 'Estagiário', color: 'green' },
+          { name: 'Não analisada', color: 'gray' }
+        ]}},
+        "Origem": { rich_text: {} },
+        "Categoria": { rich_text: {} },
+        "Data": { date: {} },
+        "DDL": { date: {} },
+        "Tempo (h)": { number: { format: 'number' } }
+      }
+    })
+  });
+  return await resp.json();
+}
+
+// ── CONFIG MODAL ──
+function openModal() {
+  document.getElementById('cfg-token').value = notionToken;
+  document.getElementById('cfg-page').value = notionDB;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+async function testarConexao() {
+  const token = document.getElementById('cfg-token').value.trim();
+  const status = document.getElementById('modal-status');
+  if (!token) { status.innerHTML = '<span style="color:var(--red)">Cole o token primeiro.</span>'; return; }
+  status.innerHTML = '<span class="spinner"></span> Testando...';
+  document.getElementById('btn-test').disabled = true;
+  try {
+    const r = await fetch('https://api.notion.com/v1/users/me', {
+      headers: { 'Authorization': `Bearer ${token}`, 'Notion-Version': '2022-06-28' }
+    });
+    const d = await r.json();
+    if (d.object === 'user') {
+      status.innerHTML = `<span style="color:var(--green)">✓ Conectado como: ${d.name || d.bot?.workspace_name || 'Integração OK'}</span>`;
+    } else {
+      status.innerHTML = `<span style="color:var(--red)">Token inválido. Verifique e tente novamente.</span>`;
+    }
+  } catch (e) {
+    status.innerHTML = `<span style="color:var(--red)">Falha de conexão.</span>`;
+  }
+  document.getElementById('btn-test').disabled = false;
+}
+
+async function salvarConfig() {
+  const token = document.getElementById('cfg-token').value.trim();
+  const page = document.getElementById('cfg-page').value.trim().replace(/-/g, '');
+  const status = document.getElementById('modal-status');
+  if (!token || !page) { status.innerHTML = '<span style="color:var(--red)">Preencha token e Page ID.</span>'; return; }
+
+  status.innerHTML = '<span class="spinner"></span> Criando database no Notion...';
+  document.getElementById('btn-save-cfg').disabled = true;
+
+  try {
+    const db = await criarDatabaseNotion(token, page);
+    if (db.object === 'database') {
+      notionToken = token;
+      notionDB = db.id;
+      localStorage.setItem('notion_token', token);
+      localStorage.setItem('notion_db', db.id);
+      status.innerHTML = `<span style="color:var(--green)">✓ Database criado! ID: ${db.id.slice(0,8)}...</span>`;
+      updateStatusBar();
+      setTimeout(closeModal, 1500);
+    } else {
+      status.innerHTML = `<span style="color:var(--red)">Erro: ${db.message || 'verifique se conectou a integração à página'}</span>`;
+    }
+  } catch (e) {
+    status.innerHTML = `<span style="color:var(--red)">Falha ao criar database.</span>`;
+  }
+  document.getElementById('btn-save-cfg').disabled = false;
+}
+
+// ── RENDER DEMANDAS ──
+function renderDemandas() {
+  const fT = document.getElementById('filtro-tipo').value;
+  const fP = document.getElementById('filtro-pessoa').value;
+  const fC = document.getElementById('filtro-centralizavel').value;
+  const lista = document.getElementById('lista-demandas');
+
+  let filtered = demandas.filter(d =>
+    (!fT || d.tipo === fT) &&
+    (!fP || d.pessoa === fP) &&
+    (!fC || d.ai?.centralizavel === fC)
+  );
+
+  if (!filtered.length) {
+    lista.innerHTML = `<div class="empty"><div class="empty-icon">📭</div>Nenhuma demanda registrada ainda.<br>Vá para "Registrar" para adicionar a primeira.</div>`;
+    return;
+  }
+
+  const tipoBadge = { 'Recebida': 'badge-recebida', 'Enviada': 'badge-enviada', 'Projeto interno': 'badge-projeto', 'Urgência adhoc': 'badge-urgencia' };
+  const cenClass = { 'Alto risco': 'c-alto', 'Risco médio': 'c-medio', 'Baixo risco': 'c-baixo' };
+  const urgChip = { 'Alta': 'chip-red', 'Média': 'chip-amber', 'Baixa': 'chip-green' };
+
+  lista.innerHTML = filtered.map(d => `
+    <div class="demand-card">
+      <div class="demand-header">
+        <div>
+          <div class="demand-title">${d.desc.length > 100 ? d.desc.slice(0, 100) + '…' : d.desc}</div>
+          <div class="demand-meta">${d.pessoa} · ${d.data}${d.ddl ? ' · DDL: ' + d.ddl : ''}${d.origem ? ' · ' + d.origem : ''}</div>
+        </div>
+      </div>
+      <div class="demand-chips">
+        <span class="badge ${tipoBadge[d.tipo] || ''}">${d.tipo}</span>
+        ${d.ai ? `<span class="chip ${urgChip[d.ai.urgencia] || 'chip-gray'}" style="font-size:11px">Urg: ${d.ai.urgencia}</span>` : ''}
+        ${d.ai ? `<span class="chip chip-purple" style="font-size:11px">${d.ai.senioridade_minima}</span>` : ''}
+        ${d.ai ? `<span class="centralizavel-tag ${cenClass[d.ai.centralizavel] || ''}">${d.ai.centralizavel}</span>` : ''}
+        ${d.tempo ? `<span class="chip chip-gray" style="font-size:11px">${d.tempo}h est.</span>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── RENDER DASHBOARD ──
+function renderDashboard() {
+  const dc = document.getElementById('dash-content');
+  if (!demandas.length) {
+    dc.innerHTML = `<div class="empty"><div class="empty-icon">📊</div>Registre demandas para ver o dashboard.</div>`;
+    return;
+  }
+
+  const total = demandas.length;
+  const urgentes = demandas.filter(d => d.ai?.urgencia === 'Alta').length;
+  const adhoc = demandas.filter(d => d.tipo === 'Urgência adhoc').length;
+  const alto_risco = demandas.filter(d => d.ai?.centralizavel === 'Alto risco').length;
+  const pct_risco = Math.round(alto_risco / total * 100);
+  const horas = demandas.reduce((s, d) => s + (d.tempo || 0), 0);
+
+  const porPessoa = {};
+  Object.keys(PESSOAS_NIVEL).forEach(p => { porPessoa[p] = { total: 0, urgente: 0, alto_risco: 0, horas: 0 }; });
+  demandas.forEach(d => {
+    if (!porPessoa[d.pessoa]) porPessoa[d.pessoa] = { total: 0, urgente: 0, alto_risco: 0, horas: 0 };
+    porPessoa[d.pessoa].total++;
+    if (d.ai?.urgencia === 'Alta') porPessoa[d.pessoa].urgente++;
+    if (d.ai?.centralizavel === 'Alto risco') porPessoa[d.pessoa].alto_risco++;
+    if (d.tempo) porPessoa[d.pessoa].horas += d.tempo;
+  });
+
+  const maxTotal = Math.max(...Object.values(porPessoa).map(x => x.total), 1);
+  const pessoasAtivas = Object.entries(porPessoa).filter(([, v]) => v.total > 0).sort((a, b) => b[1].total - a[1].total);
+
+  const avatarColor = (nome) => {
+    const colors = ['#FFF0ED', '#E6F4FF', '#F9F0FF', '#F6FFED', '#FFF7E6'];
+    const textColors = ['var(--orange)', 'var(--blue)', 'var(--purple)', 'var(--green)', 'var(--amber)'];
+    const idx = nome.charCodeAt(0) % colors.length;
+    return { bg: colors[idx], color: textColors[idx] };
+  };
+
+  dc.innerHTML = `
+    <div class="metrics-grid">
+      <div class="metric-card"><div class="metric-label">Total demandas</div><div class="metric-value">${total}</div></div>
+      <div class="metric-card"><div class="metric-label">Urgências adhoc</div><div class="metric-value" style="color:var(--red)">${adhoc}</div><div class="metric-sub">interrompem trabalho planejado</div></div>
+      <div class="metric-card"><div class="metric-label">Alta urgência</div><div class="metric-value" style="color:var(--amber)">${urgentes}</div><div class="metric-sub">classificadas pela IA</div></div>
+      <div class="metric-card"><div class="metric-label">Risco centralizar</div><div class="metric-value">${pct_risco}%</div><div class="metric-sub">não podem ir para a Central</div></div>
+      <div class="metric-card"><div class="metric-label">Horas estimadas</div><div class="metric-value">${horas}</div><div class="metric-sub">no total do time</div></div>
+    </div>
+
+    ${pct_risco >= 40 ? `<div class="alert">⚠️ <b>${pct_risco}% das demandas têm alto risco de centralização</b> — exigem contexto e senioridade que a Central não possui. Esse dado suporta o argumento contra a redução de headcount.</div>` : ''}
+
+    <div class="card" style="margin-bottom:12px">
+      <div class="card-title">Volume por pessoa</div>
+      ${pessoasAtivas.map(([p, v]) => {
+        const c = avatarColor(p);
+        const nivel = PESSOAS_NIVEL[p] || '';
+        const pct = Math.round(v.total / maxTotal * 100);
+        return `<div class="person-bar">
+          <div class="avatar" style="background:${c.bg};color:${c.color}">${p.slice(0,2).toUpperCase()}</div>
+          <div style="flex:1;min-width:0">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px">
+              <span style="font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p}</span>
+              <span style="font-size:11px;color:var(--ink-3);white-space:nowrap">${nivel}</span>
+            </div>
+            <div style="font-size:11px;color:var(--ink-3);margin-bottom:4px">${v.total} demanda${v.total !== 1 ? 's' : ''}${v.urgente ? ' · ' + v.urgente + ' urgente' + (v.urgente !== 1 ? 's' : '') : ''}${v.horas ? ' · ~' + v.horas + 'h' : ''}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+          </div>
+          <span style="font-size:12px;font-weight:700;min-width:20px;text-align:right">${v.total}</span>
+        </div>`;
+      }).join('')}
+    </div>
+
+    <div class="card">
+      <div class="card-title">Argumento de centralização</div>
+      <div class="split-grid">
+        <div>
+          <div class="split-col-title" style="color:var(--red)">⚠ Alto risco — precisa do time</div>
+          ${demandas.filter(d => d.ai?.centralizavel === 'Alto risco').slice(0, 5).map(d =>
+            `<div class="split-item">${d.desc.slice(0, 70)}…<br><span style="color:var(--ink-4);font-size:10px">${d.pessoa} · ${d.ai?.senioridade_minima}</span></div>`
+          ).join('') || '<div class="split-item" style="color:var(--ink-4)">Nenhuma ainda.</div>'}
+        </div>
+        <div>
+          <div class="split-col-title" style="color:var(--green)">✓ Baixo risco — pode centralizar</div>
+          ${demandas.filter(d => d.ai?.centralizavel === 'Baixo risco').slice(0, 5).map(d =>
+            `<div class="split-item">${d.desc.slice(0, 70)}…<br><span style="color:var(--ink-4);font-size:10px">${d.pessoa} · ${d.ai?.senioridade_minima}</span></div>`
+          ).join('') || '<div class="split-item" style="color:var(--ink-4)">Nenhuma ainda.</div>'}
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
+        <button class="btn btn-ai" onclick="gerarAnalise()">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.5 4.5H14L10.5 8l1.5 4.5L8 10 4 12.5 5.5 8 2 5.5h4.5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Gerar análise de headcount com IA ↗
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function gerarAnalise() {
+  const total = demandas.length;
+  const alto = demandas.filter(d => d.ai?.centralizavel === 'Alto risco').length;
+  const urgentes = demandas.filter(d => d.tipo === 'Urgência adhoc').length;
+  const horas = demandas.reduce((s, d) => s + (d.tempo || 0), 0);
+  const msg = `Temos ${total} demandas registradas. ${alto} foram classificadas como alto risco de centralização (${Math.round(alto/total*100)}%). ${urgentes} foram urgências adhoc. Total de ~${horas}h estimadas. Com base nesses dados, me ajude a montar um argumento estruturado para a discussão de headcount com minha liderança: o que perdemos quantitativamente e qualitativamente se centralizar, qual nível de senioridade cada tipo de demanda exige, e se a proposta de reduzir headcount e centralizar no time da Central faz sentido ou não.`;
+  if (window.parent && window.parent.sendPrompt) window.parent.sendPrompt(msg);
+  else alert('Copie e cole no Claude:\n\n' + msg);
+}
+</script>
+</body>
+</html>
