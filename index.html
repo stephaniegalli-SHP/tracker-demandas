@@ -135,6 +135,16 @@
   .split-item { font-size: 11px; color: var(--ink-2); padding: 5px 0; border-bottom: 1px solid var(--border); line-height: 1.4; }
   .split-item:last-child { border-bottom: none; }
   .origem-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+  .edit-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 1001; padding: 1rem; }
+  .edit-modal-overlay.open { display: flex; }
+  .edit-modal { background: var(--white); border-radius: var(--radius-lg); padding: 1.75rem; width: 100%; max-width: 560px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
+  .edit-modal-title { font-size: 15px; font-weight: 600; margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between; }
+  .btn-edit { background: none; border: 1px solid var(--border-strong); border-radius: var(--radius); padding: 4px 10px; font-size: 11px; color: var(--ink-3); cursor: pointer; transition: all .15s; }
+  .btn-edit:hover { background: var(--surface); color: var(--ink-2); }
+  .btn-delete { background: none; border: none; padding: 4px 8px; font-size: 11px; color: var(--ink-4); cursor: pointer; transition: all .15s; }
+  .btn-delete:hover { color: var(--red); }
+
   @media (max-width: 600px) {
     .form-grid-2, .form-grid-3, .split-grid, .origem-row { grid-template-columns: 1fr; }
     main { padding: 1rem; }
@@ -676,10 +686,11 @@ function renderDemandas() {
     const origemLabel = d.origemTipo + (d.origemDetalhe ? ' · ' + d.origemDetalhe : '');
     return `<div class="demand-card">
       <div class="demand-header">
-        <div>
+        <div style="flex:1">
           <div class="demand-title">${d.desc.length > 100 ? d.desc.slice(0, 100) + '…' : d.desc}</div>
-          <div class="demand-meta">${d.pessoa} · ${d.data}${d.ddl ? ' · DDL: ' + d.ddl : ''}${origemLabel ? ' · ' + origemLabel : ''}</div>
+          <div class="demand-meta">${d.pessoa} · ${d.data}${d.ddl ? ' · DDL: ' + d.ddl : ''}${origemLabel ? ' · ' + origemLabel : ''}${d.editadoEm ? ' · <i>editado em ' + d.editadoEm + '</i>' : ''}</div>
         </div>
+        <button class="btn-edit" onclick="openEditModal(${d.id})">✏ Editar</button>
       </div>
       <div class="demand-chips">
         <span class="badge ${fluxoBadge[d.fluxo] || ''}">${d.fluxo}</span>
@@ -774,6 +785,81 @@ function gerarAnalise() {
   if (window.parent && window.parent.sendPrompt) window.parent.sendPrompt(msg);
   else { navigator.clipboard?.writeText(msg); toast('Texto copiado! Cole no Claude.'); }
 }
+let editingId = null;
+
+function openEditModal(id) {
+  const d = demandas.find(x => x.id === id);
+  if (!d) return;
+  editingId = id;
+  document.getElementById('edit-desc').value = d.desc || '';
+  document.getElementById('edit-fluxo').value = d.fluxo || '';
+  document.getElementById('edit-categoria').value = d.categoria || '';
+  document.getElementById('edit-ddl').value = d.ddl || '';
+  document.getElementById('edit-tempo').value = d.tempo || '';
+  document.getElementById('edit-origem-tipo').value = d.origemTipo || '';
+  // Parse detalhe origem
+  if (d.origemDetalhe && d.origemTipo === 'Outra área') {
+    const parts = d.origemDetalhe.split(' – ');
+    document.getElementById('edit-area').value = parts[0] || '';
+    document.getElementById('edit-origem-nome').value = parts[1] || '';
+  } else {
+    document.getElementById('edit-area').value = '';
+    document.getElementById('edit-origem-nome').value = d.origemDetalhe || '';
+  }
+  toggleEditOrigem();
+  document.getElementById('edit-modal').classList.add('open');
+}
+
+function closeEditModal() {
+  document.getElementById('edit-modal').classList.remove('open');
+  editingId = null;
+}
+
+function toggleEditOrigem() {
+  const val = document.getElementById('edit-origem-tipo').value;
+  const areaField = document.getElementById('edit-area-field');
+  areaField.style.display = val === 'Outra área' ? 'flex' : 'none';
+}
+
+function salvarEdicao() {
+  if (!editingId) return;
+  const idx = demandas.findIndex(x => x.id === editingId);
+  if (idx === -1) return;
+  const origemTipo = document.getElementById('edit-origem-tipo').value;
+  let origemDetalhe = '';
+  if (origemTipo === 'Outra área') {
+    const area = document.getElementById('edit-area').value;
+    const nome = document.getElementById('edit-origem-nome').value.trim();
+    origemDetalhe = area + (nome ? ' – ' + nome : '');
+  } else {
+    origemDetalhe = document.getElementById('edit-origem-nome').value.trim();
+  }
+  demandas[idx] = {
+    ...demandas[idx],
+    desc: document.getElementById('edit-desc').value.trim(),
+    fluxo: document.getElementById('edit-fluxo').value,
+    categoria: document.getElementById('edit-categoria').value,
+    ddl: document.getElementById('edit-ddl').value,
+    tempo: parseFloat(document.getElementById('edit-tempo').value) || 0,
+    origemTipo, origemDetalhe,
+    editadoEm: new Date().toISOString().slice(0,10)
+  };
+  save();
+  closeEditModal();
+  toast('Demanda atualizada!');
+  renderDemandas();
+}
+
+function deletarDemanda() {
+  if (!editingId) return;
+  if (!confirm('Tem certeza que quer excluir esta demanda?')) return;
+  demandas = demandas.filter(x => x.id !== editingId);
+  save();
+  closeEditModal();
+  toast('Demanda excluída.');
+  renderDemandas();
+}
+
 </script>
 </body>
 </html>
